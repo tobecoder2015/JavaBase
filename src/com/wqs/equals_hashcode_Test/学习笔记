@@ -1,0 +1,338 @@
+java在比较对象等场景时间需要比较两个对象是否相等，在这个操作过程中，三个方法用的比较常见，分别为hashcode、equals、==方法，自定义Person类，实例化两个对象p1和p2，二者信息相同，通过以下不同设定，分析三种方法的使用原理。
+
+1.
+测试代码：
+
+public class Person {
+public String name; 
+public int age;
+
+public Person(String name,int age)
+{
+this.name=name;
+this.age=age;
+}
+
+}
+
+
+public class EqualTest {
+
+public static void main(String[] args) {
+// TODO Auto-generated method stub
+Person p1 = new Person("wqs", 12); 
+Person p2 = new Person("wqs", 12); 
+
+System.out.println(p1 + " " + p1.hashCode()); 
+System.out.println(p2 + " " + p2.hashCode()); 
+
+System.out.println(p1.equals(p2)); 
+System.out.println(p1==p2); 
+}
+
+}
+
+运行结果：
+com.wqs.equals_hashcode_Test.Person@659e0bfd 1704856573
+com.wqs.equals_hashcode_Test.Person@2a139a55 705927765
+false
+false
+
+分析：
+自定义类没有重写基类（object）的hashcode和equals方法时，equals和==方法都认为P1和P2是不同的对象，这种情况下hashcode默认是对象的存储地址。可能默认状态下
+equal和==判断的依据都是hashcode值，下面我们重写hashcode方法，使其返回值不变，看equal和==的结果
+
+2.
+测试代码：重写 hashcode方法，都返回相同值
+public class Person {
+
+@Override
+public boolean equals(Object obj) {
+return super.equals(obj);
+}
+
+
+@Override
+public int hashCode() {
+//return super.hashCode();
+return 1;
+}
+
+public String name; 
+public int age;
+
+public Person(String name,int age)
+{
+this.name=name;
+this.age=age;
+}
+
+}
+
+
+结果：
+com.wqs.equals_hashcode_Test.Person@1 1
+com.wqs.equals_hashcode_Test.Person@1 1
+false
+false
+
+分析：
+重写hashcode方法确实改变了hashcode值，但是两个对象的equals和==方法还是返回了false,这说明equals和==方法在默认状态下不是以hashcode为判断标准的。再仅重写
+equals 方法
+
+3.
+测试代码：重写equals方法，都返回true
+
+public class Person {
+
+@Override
+public boolean equals(Object obj) {
+//return super.equals(obj);
+return true;
+}
+
+
+@Override
+public int hashCode() {
+return super.hashCode();
+//return 1;
+}
+
+public String name; 
+public int age;
+
+public Person(String name,int age)
+{
+this.name=name;
+this.age=age;
+}
+
+}
+
+结果：
+
+com.wqs.equals_hashcode_Test.Person@659e0bfd 1704856573
+com.wqs.equals_hashcode_Test.Person@2a139a55 705927765
+true
+false
+
+分析： 
+hashcode值确实不同的，因为存储的地址不同，equals方法毫无疑问是返回的是true,但是==方法还是不相同，这说明==方法都不依赖hashcode和equals，至少重写hashcode和
+equals方法对==方法没影响，这里暂且把影响==方法的唯一因素归咎为对象的实际内存地址，重写后hashcode值并不是内存的地址。
+
+4.
+测试代码：让两个对象拥有相同的内存地址，但是重写hashcode和equals方法，equals方法返回false，hashcode返回的值不同
+public class Person {
+
+@Override
+public boolean equals(Object obj) {
+//return super.equals(obj);
+return false;
+}
+
+@Override
+public int hashCode() {
+//return super.hashCode();
+Random rand=new Random();
+return rand.nextInt(100);
+}
+
+public String name; 
+public int age;
+
+public Person(String name,int age)
+{
+this.name=name;
+this.age=age;
+}
+}
+
+
+public class EqualTest {
+
+public static void main(String[] args) {
+// TODO Auto-generated method stub
+Person p1 = new Person("wqs", 12); 
+Person p2 =p1;
+
+System.out.println(p1 + " " + p1.hashCode()); 
+System.out.println(p2 + " " + p2.hashCode()); 
+
+System.out.println(p1.equals(p2)); 
+System.out.println(p1==p2); 
+
+}
+
+}
+
+结果：
+com.wqs.equals_hashcode_Test.Person@1c 58
+com.wqs.equals_hashcode_Test.Person@36 42
+false
+true
+
+分析：如前所想，==确实是不依赖hashcode值和equals方法的结果，p1和p2指向同一个对象，对象地址相同，==就返回true,否则就返回false.
+
+
+5.
+测试代码：默认基类（object）的hashcode和equals方法，q1和q2指向同一对象，即对象内存地址相同
+public class Person {
+
+@Override
+public boolean equals(Object obj) {
+return super.equals(obj);
+//return false;
+}
+
+@Override
+public int hashCode() {
+return super.hashCode();
+// Random rand=new Random();
+// return rand.nextInt(100);
+}
+
+public String name; 
+public int age;
+
+public Person(String name,int age)
+{
+this.name=name;
+this.age=age;
+}
+}
+
+public class EqualTest {
+
+public static void main(String[] args) {
+// TODO Auto-generated method stub
+Person p1 = new Person("wqs", 12); 
+Person p2 =p1;
+
+System.out.println(p1 + " " + p1.hashCode()); 
+System.out.println(p2 + " " + p2.hashCode()); 
+
+System.out.println(p1.equals(p2)); 
+System.out.println(p1==p2); 
+
+}
+
+}
+
+结果：
+com.wqs.equals_hashcode_Test.Person@659e0bfd 1704856573
+com.wqs.equals_hashcode_Test.Person@659e0bfd 1704856573
+true
+true
+
+分析：如前所想，默认的hashcode是内存地址，==和equals方法默认比较的是内存地址。
+
+
+到这，我们可以确定==的比较仅是依据内存实际地址。那么hashcode和equals方法的联系是什么，从上面看二者确实没有表现出很明显的关系。在这里，熟悉数据结构的可能会知道，在hash函数部分，一般通过一定的hash方法将数值映射到一定的空间内，
+比方说通过余数方法来进行hash,余数为2的情况下，是会出现多个命中值，这里的hash值应该是2，但是是否相等还需进行相等判断
+
+6.
+
+测试代码：重写equals和hashcode方法
+
+public class Person {
+
+@Override
+public boolean equals(Object obj) {
+if(obj instanceof Person )
+{
+Person p=(Person)obj;
+if(p.name==this.name&&p.age==this.age)
+return true;
+else
+return false;
+}
+else
+return super.equals(obj);
+//return false;
+}
+
+@Override
+public int hashCode() {
+return this.name.hashCode();
+// Random rand=new Random();
+// return rand.nextInt(100);
+}
+
+public String name; 
+public int age;
+
+public Person(String name,int age)
+{
+this.name=name;
+this.age=age;
+}
+}
+
+public class EqualTest {
+
+public static void main(String[] args) {
+// TODO Auto-generated method stub
+Person p1 = new Person("wqs", 12); 
+Person p2 = new Person("wqs", 12); 
+
+System.out.println(p1 + " " + p1.hashCode()); 
+System.out.println(p2 + " " + p2.hashCode()); 
+
+System.out.println(p1.equals(p2)); 
+System.out.println(p1==p2); 
+
+}
+
+}
+
+结果：
+com.wqs.equals_hashcode_Test.Person@1ccd9 117977
+com.wqs.equals_hashcode_Test.Person@1ccd9 117977
+true
+false
+
+分析：==理所当然为false,经过重写equals方法，符合了人的直观逻辑，属性值都相同的对象应该相等。实际情况下，一般用对象的某个属性值作为hashcode来进行对象的索引，
+但是对象还有其他属性需要再进行对比。上个例子中，对name属性进行hash来进行索引，但是年龄有可能不同。如下，hashcode相同，但是年龄不同，对象是不equals的。
+
+public static void main(String[] args) {
+// TODO Auto-generated method stub
+Person p1 = new Person("wqs", 12); 
+Person p2 = new Person("wqs", 28); 
+
+System.out.println(p1 + " " + p1.hashCode()); 
+System.out.println(p2 + " " + p2.hashCode()); 
+
+System.out.println(p1.equals(p2)); 
+System.out.println(p1==p2); 
+
+}
+
+
+总结：
+
+==强调的是物理层面的相等，对象的存储地址相同，==才返回true，并且==没有重写方法，这点也说明对于大部分情况，==就是比较对象的内存地址是否相等。
+equals强调的是逻辑上的相等，即属性相同的两个对象是相等的，子类重写equals方法就是为了实现逻辑比较，但是默认是比较地址的，这点需要注意，所以一般情况下需要重写
+hashcode 是一种对象的索引机制，默认是内存地址转换成的整数，子类可以重写，来实现自己的索引。hashcode实际上是为equals服务的，在很多对象情况下，逻辑的一一比较是很费时间的，通过hashcode
+进行初步的过滤，然后在有限对象中进行逻辑比较，提高效率。 从数据结构角度看，我们先通过 hashcode来判断两个类是否存放某个桶里，但这个桶里可能有很多类，那么我们就需要再通过 equals 来在这个桶里找到我们要的类。 
+那么。重写了equals()，为什么还要重写hashCode()呢？ 重写hashCode()就是先必找到这个桶，否则光重写equals()没什么用！ 
+
+
+hashcode的作用
+1、hashCode的存在主要是用于查找的快捷性，如Hashtable，HashMap等，hashCode是用来在散列存储结构中确定对象的存储地址的；
+2、如果两个对象相同，就是适用于equals(java.lang.Object) 方法，那么这两个对象的hashCode一定要相同；
+3、如果对象的equals方法被重写，那么对象的hashCode也尽量重写，并且产生hashCode使用的对象，一定要和equals方法中使用的一致，否则就会违反上面提到的第2点；
+4、两个对象的hashCode相同，并不一定表示两个对象就相同，也就是不一定适用于equals(java.lang.Object) 方法，只能够说明这两个对象在散列存储结构中，如Hashtable，他们“存放在同一个篮子里”。
+
+
+HashSet等唯一性集合通过equals方法来进行唯一性比较
+
+
+
+
+
+
+
+
+
+
+

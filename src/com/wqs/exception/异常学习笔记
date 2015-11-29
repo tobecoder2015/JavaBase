@@ -1,0 +1,3 @@
+五个关键字    try  catch finally throw  throws
+Throwable ->Error （处理不了） 、Exception->RuntimeException（可选择处理）、必须处理的异常
+处理原则：先处理小的，再处理大的
